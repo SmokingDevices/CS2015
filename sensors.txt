@@ -1,3 +1,18 @@
-name				categorie					url
-Adafruit Ultimate GPS		GPS						http://www.watterott.com/de/Adafruit-Ultimate-GPS-Breakout-66-channel
+name				categorie			url
+Adafruit Ultimate GPS		GPS				http://www.watterott.com/de/Adafruit-Ultimate-GPS-Breakout-66-channel
+
+Adafruit BMP183 SPI Barometric 
+Pressure & Altitude Sensor	Pressure			http://www.exp-tech.de/Sensoren/Druck/adafruit-bmp183-spi-barometric-pressure-altitude-sensor.html
+
+Adafruit ADXL326 - 5V ready 	acceleration			http://www.exp-tech.de/Sensoren/ADXL326-5V-ready-triple-axis-accelerometer-16g-analog-out.html
+3-Achsen Beschleunigungssensor 
+(+-16g analog out)	
+
+Adafruit MicroSD card breakout	SD-Card				http://www.exp-tech.de/Shields/MicroSD-card-breakout-board.html
+
+DHT22 temperature-humidity	temperature			http://www.exp-tech.de/Sensoren/Temperatur/DHT22-temperature-humidity-sensor-extras.html
+
+
+
+	
 
