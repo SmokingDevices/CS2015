@@ -13,6 +13,10 @@ Adafruit MicroSD card breakout	SD-Card				http://www.exp-tech.de/Shields/MicroSD
 DHT22 temperature-humidity	temperature			http://www.exp-tech.de/Sensoren/Temperatur/DHT22-temperature-humidity-sensor-extras.html
 
 
-
+Pressuresensor 10kg   		Pressure			http://www.watterott.com/de/Force-Sensitive-Resistor-Square
+Pressurepoti			Resistor			http://www.watterott.com/de/HotPot-Folienpotentiometer-100mm
+Gyroskop			Orientation			http://www.watterott.com/de/Tri-Axis-Gyro-Breakout-L3G4200D
+Distancesensor			Distance			http://www.watterott.com/de/MB1003-HRLV-MaxSonar-EZ0
+Ultrasonic Distance Sensor	Distance 			http://www.watterott.com/de/Parallax-PING-Ultrashall-Entfernungsmesser
 	
 
