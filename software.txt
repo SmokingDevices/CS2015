@@ -1,5 +1,5 @@
-name    		description				license		systeme		url
+name    		description				license		system		url
 freemind		MindMapping Tool			GPL v2		win/linux/mac	http://freemind.sourceforge.net/wiki/index.php/Main_Page
-GitHub for Windows	Gute Oberfläche für Windows				win		https://windows.github.com/
-
+GitHub for Windows	github management tool			win		win		https://windows.github.com/
+testlink                test management tool  			GPL v3  	
 
