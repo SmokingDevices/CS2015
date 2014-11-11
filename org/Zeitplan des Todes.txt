@@ -1,0 +1,7 @@
+Zeitplan für CanSat 2.0
+
+		Bis 1.12.2014
+- Eintragungen wichtiger Bestandteile für den CanSat in die EInkaufsliste
+	
+		hochgeladen bis 15.12.2014 in github
+- Aufgabenliste von jedem Team, um einen Überblick über die notwendigen Arbeiten/Ziele zu haben
