@@ -2,4 +2,5 @@ name    		description				license		system		url
 freemind		MindMapping Tool			GPL v2		win/linux/mac	http://freemind.sourceforge.net/wiki/index.php/Main_Page
 GitHub for Windows	github management tool			win		win		https://windows.github.com/
 testlink                test management tool (php)		GPL v3          win/linux/mac	http://testlink.org  	
+open project		project manager tool			open source	win/linux/mac	http://openproject.org
 
