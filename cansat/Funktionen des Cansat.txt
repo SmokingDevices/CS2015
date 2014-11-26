@@ -1,0 +1,22 @@
+Primärmission:
+- Luftdruck und Temperatur
+
+Sekundärmission:
+-Staubkonzentration in der Luft
+- Panoramafotos bzw 180 ° Umsicht?
+- Klappmechanismus Kamera?
+- Beschleunigung ?
+- Senden der Daten und Speichern auf einer SD-Karte
+
+Bergungsmission:
+- GPS
+- Lagesensor?
+- Pieper
+- Auswurfsystem?
+- mobile Bodenstation
+
+Fallschirm
+- Verschiedene Größen
+- Signalfarbe
+- besondere Anbringung (Gase)
+
