@@ -10,6 +10,7 @@ Adafruit ADXL326 - 5V ready 	acceleration			http://www.exp-tech.de/Sensoren/ADXL
 
 Adafruit MicroSD card breakout	SD-Card				http://www.exp-tech.de/Shields/MicroSD-card-breakout-board.html
 
+DHT11 temperature-humidity	temperature			http://www.exp-tech.de/dht11-humidity-temperature-sensor
 DHT22 temperature-humidity	temperature			http://www.exp-tech.de/Sensoren/Temperatur/DHT22-temperature-humidity-sensor-extras.html
 
 
