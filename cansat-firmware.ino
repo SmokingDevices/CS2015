@@ -12,7 +12,7 @@
 #define SERPERATOR ","
 const int chipSelect = 27;
 #define dustPin A9 // angeschlossen an Pin A9
-#define dustLEDPin 2
+#define dustLEDPin 4
 /*********************** Assign a unique ID to the sensors ****************************/
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(30302);
@@ -100,12 +100,26 @@ void setup(){
   if (!SD.begin(chipSelect)) {
     Serial.println("Card failed, or not present");
     // don't do anything more:
-    //return;
+    return;
+  }
+  File myFile = SD.open("data.txt", FILE_WRITE);
+  if (myFile) {
+    Serial.print("File opened");
+    myFile.println("-----------------------------------SNIP----------------------------------");
+    // close the file:
+    myFile.close();
+    Serial.println("done.");
+  } else {
+    // if the file didn't open, print an error:
+    Serial.println("File couldnt be opened");
+    return;
   }
   
   Serial.println("Card initialised");
   digitalWrite(23, LOW);
   delay (500);
+  
+  pinMode(dustLEDPin, OUTPUT);
   
   digitalWrite(beepPin, HIGH);
   delay (500);
@@ -121,7 +135,6 @@ void setup(){
 
   
 void loop() {
-  
   sensors_event_t accEvent; 
   accel.getEvent(&accEvent);// get acceleration data
   sensors_event_t magEvent;
@@ -133,25 +146,20 @@ void loop() {
   float temperature; // Temp
 
 
-
   bmp.getTemperature(&temperature); // write temp into float
   float pressure = preshureEvent.pressure; // write current pressure to float
 
-  
   if(x1 == 0) { // get the pressure at the ground for calculating the altitude and setting this value to zero.
     x1 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating the altitude from pressure
   }
-
   float x2 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating altitude during flight
   float realhight = x2 - x1; // calculating altitude over ground
 
   //float startTime = millis();
-  
   float dht_humidity = dht.readHumidity();
   float dht_temperature = dht.readTemperature();
 
   //float endTime = millis() - startTime;
-  
   
   //Serial.println();
   //Serial.println(endTime);
@@ -172,7 +180,6 @@ void loop() {
   } else {
     dustDensity = (voltage-3.5)*2 +0.4;
   }
-  
   String gpsString = "";
   String temp = "";
   if (!ermittleGPS) {
@@ -222,37 +229,71 @@ String GetGGA() {
 
 void saveData(float accelX, float accelY, float accelZ, float magX, float magY, float magZ, float gyroX, float gyroY, float gyroZ,
               float pressure, float temperature, float dht_humidity, float dht_temperature,float dustDensity, String gpsString) {
-  Serial.print(accelX);
-  Serial.print(SERPERATOR);
-  Serial.print(accelY);
-  Serial.print(SERPERATOR);
-  Serial.print(accelZ);
-  Serial.print(SERPERATOR);
-  Serial.print(magX);
-  Serial.print(SERPERATOR);
-  Serial.print(magY);
-  Serial.print(SERPERATOR);
-  Serial.print(magZ);
-  Serial.print(SERPERATOR);
-  Serial.print(gyroX);
-  Serial.print(SERPERATOR);
-  Serial.print(gyroY);
-  Serial.print(SERPERATOR);
-  Serial.print(gyroZ);
-  Serial.print(SERPERATOR);
-  Serial.print(pressure);
-  Serial.print(SERPERATOR);
-  Serial.print(temperature);
-  Serial.print(SERPERATOR);
-  Serial.print(dht_humidity);  
-  Serial.print(SERPERATOR);
-  Serial.print(dht_temperature);
-  Serial.print(SERPERATOR);
-  Serial.print(dustDensity);
-  Serial.print(SERPERATOR);
-  Serial.print(gpsString);  
+
+  File myFile = SD.open("data.txt", FILE_WRITE);
+              
+  printData(accelX, myFile);
+  printData(SERPERATOR, myFile);
+  printData(accelY, myFile);
+  printData(SERPERATOR, myFile);
+  printData(accelZ, myFile);
+  printData(SERPERATOR, myFile);
+  printData(magX, myFile);
+  printData(SERPERATOR, myFile);
+  printData(magY, myFile);
+  printData(SERPERATOR, myFile);
+  printData(magZ, myFile);
+  printData(SERPERATOR, myFile);
+  printData(gyroX, myFile);
+  printData(SERPERATOR, myFile);
+  printData(gyroY, myFile);
+  printData(SERPERATOR, myFile);
+  printData(gyroZ, myFile);
+  printData(SERPERATOR, myFile);
+  printData(pressure, myFile);
+  printData(SERPERATOR, myFile);
+  printData(temperature, myFile);
+  printData(SERPERATOR, myFile);
+  printData(dht_humidity, myFile);  
+  printData(SERPERATOR, myFile);
+  printData(dht_temperature, myFile);
+  printData(SERPERATOR, myFile);
+  printData(dustDensity, myFile);
+  printData(SERPERATOR, myFile);
+  printData(gpsString, myFile);  
+  endLine(myFile);
   
-  Serial.println();
+  if (myFile) {
+    myFile.close();
+  } else {
+    Serial.println("File couldnt be opened");
+    Serial1.println("File couldnt be opened");
+  }
+  
+  
   
 }
 
+void printData (String data, File myFile) {
+  Serial.print(data);
+  Serial1.print(data);
+  if (myFile) {
+    myFile.print(data);
+  }
+}
+
+void printData (float data, File myFile) {
+  Serial.print(data);
+  Serial1.print(data);
+  if (myFile) {
+    myFile.print(data);
+  }
+}
+
+void endLine (File myFile) {
+  Serial.println();
+  Serial1.println();
+  if (myFile) {
+    myFile.println();
+  }
+}
