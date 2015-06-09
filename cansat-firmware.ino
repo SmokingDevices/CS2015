@@ -37,6 +37,8 @@ boolean readGPS = false;
 int dustValue = 0; // Wert der vom Dust Sensor kommt
 float voltage = 0; // errechnete Voltzahl
 float dustDensity = 0; // letztendliche Staubkonzentration
+String oldGpsData;
+long lastGpsReadMillies = 0;
 
 /**************************************************************************************/
 
@@ -177,18 +179,23 @@ void loop() {
   }
   
   // read out gps data
-  String gpsString = "";
-  String temp = "";
-  if (!readGPS) {
-    temp = GetGGA();
-    if (!temp.equals("")) {
-      gpsString += temp;
+  if ((millis() - lastGpsReadMillies) > 1000) {
+    String gpsString = "";
+    String temp = "";
+    if (!readGPS) {
+      temp = GetGGA();
+      lastGpsReadMillies = millis();
+      if (!temp.equals("")) {
+        gpsString += temp;
+        oldGpsData = gpsString;
+      }
     }
   }
   
   // save all the values
   saveData(currentHeight, accEvent.acceleration.x, accEvent.acceleration.y, accEvent.acceleration.z, magEvent.magnetic.x, magEvent.magnetic.y, magEvent.magnetic.z,
-           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, externalTemperature, humidity, gpsString);
+           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, externalTemperature, humidity, oldGpsData);
+  delay(100);
 
 }
 
@@ -249,6 +256,8 @@ void saveData(float currentHeight, float accelX, float accelY, float accelZ, flo
   File myFile = SD.open("data.txt", FILE_WRITE);
               
   // print all the data to each channel
+  printData(millis(), myFile);
+  printData(SERPERATOR, myFile);
   printData(currentHeight, myFile);
   printData(SERPERATOR, myFile);
   printData(accelX, myFile);
