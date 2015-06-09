@@ -1,13 +1,10 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP085_U.h>
-#include "DHT.h"
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
 #include <Adafruit_10DOF.h>
 #include <SD.h>
-#define DHTPIN 8
-#define DHTTYPE DHT11
 #define beepPin 5 // digitaler D-Pin 5 für Beeper
 #define SERPERATOR ","
 const int chipSelect = 27;
@@ -41,7 +38,6 @@ int dustValue = 0; // Wert der vom Dust Sensor kommt
 float voltage = 0; // errechnete Voltzahl
 float dustDensity = 0; // letztendliche Staubkonzentration
 /**************************************************************************************/
-DHT dht(DHTPIN, DHTTYPE);
 
 void setup(){
   Serial.begin(19200);
@@ -84,7 +80,6 @@ void setup(){
   digitalWrite(20, LOW);
   delay (500);
 
-  dht.begin();
   digitalWrite(21, LOW);
   delay (500);
   
@@ -156,9 +151,6 @@ void loop() {
   float realhight = x2 - x1; // calculating altitude over ground
 
   //float startTime = millis();
-  float dht_humidity = dht.readHumidity();
-  float dht_temperature = dht.readTemperature();
-
   //float endTime = millis() - startTime;
   
   //Serial.println();
@@ -189,7 +181,7 @@ void loop() {
     }
   }
   saveData(accEvent.acceleration.x, accEvent.acceleration.y, accEvent.acceleration.z, magEvent.magnetic.x, magEvent.magnetic.y, magEvent.magnetic.z,
-           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dht_humidity, dht_temperature, dustDensity, gpsString);
+           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, gpsString);
 
 }
 
@@ -228,7 +220,7 @@ String GetGGA() {
 
 
 void saveData(float accelX, float accelY, float accelZ, float magX, float magY, float magZ, float gyroX, float gyroY, float gyroZ,
-              float pressure, float temperature, float dht_humidity, float dht_temperature,float dustDensity, String gpsString) {
+              float pressure, float temperature, float dustDensity, String gpsString) {
 
   File myFile = SD.open("data.txt", FILE_WRITE);
               
@@ -253,10 +245,6 @@ void saveData(float accelX, float accelY, float accelZ, float magX, float magY, 
   printData(pressure, myFile);
   printData(SERPERATOR, myFile);
   printData(temperature, myFile);
-  printData(SERPERATOR, myFile);
-  printData(dht_humidity, myFile);  
-  printData(SERPERATOR, myFile);
-  printData(dht_temperature, myFile);
   printData(SERPERATOR, myFile);
   printData(dustDensity, myFile);
   printData(SERPERATOR, myFile);
