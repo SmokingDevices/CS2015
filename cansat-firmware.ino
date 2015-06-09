@@ -22,9 +22,6 @@ Adafruit_L3GD20_Unified gyro = Adafruit_L3GD20_Unified(20);
 /*****************************Global Defines ******************************************/
 float groundPressure = 0;
 boolean wasAbove50m = false;
-//float x2 = 0;
-//float x1 = 0;
-//float realhight;
 float accelX;
 float accelY;
 float accelZ;
@@ -34,13 +31,13 @@ float magZ;
 float gyroX;
 float gyroY;
 float gyroZ;
-float pressureGlobal;
 float temp;
-boolean ermittleGPS = false;
+boolean readGPS = false;
 // Dustsensor (2)
 int dustValue = 0; // Wert der vom Dust Sensor kommt
 float voltage = 0; // errechnete Voltzahl
 float dustDensity = 0; // letztendliche Staubkonzentration
+
 /**************************************************************************************/
 
 void setup(){
@@ -148,6 +145,8 @@ void setup(){
 
   
 void loop() {
+  
+  // read out all the sensor values
   sensors_event_t accEvent; 
   accel.getEvent(&accEvent);// get acceleration data
   sensors_event_t magEvent;
@@ -158,69 +157,65 @@ void loop() {
   float currentHeight;
   bmp.getEvent(&preshureEvent); // get pressure
   float temperature; // Temp
-
-
   bmp.getTemperature(&temperature); // write temp into float
   float pressure = preshureEvent.pressure; // write current pressure to float
+  dustDensity = readDustSensor();// read dust value from sensor
+  
+  float externalTemperature = 99;// read NTC
+  float humidity = 111;// read humiditySensor
 
-  //if(x1 == 0) { // get the pressure at the ground for calculating the altitude and setting this value to zero.
+  // calculate the current height
   currentHeight = bmp.pressureToAltitude(groundPressure,preshureEvent.pressure); // calculating the altitude from pressure
   if (!wasAbove50m && currentHeight > 50) {
     wasAbove50m = true;   
   }
-  
+  // check if passed the boarder and switch on beeping if passed
   if (wasAbove50m && currentHeight < 50) {
     digitalWrite(beepPin, HIGH);
     delay (200);
     digitalWrite(beepPin, LOW);  
   }
-  //}
-  //float x2 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating altitude during flight
-  //float realhight = x2 - x1; // calculating altitude over ground
-
-  //float startTime = millis();
-  //float endTime = millis() - startTime;
   
-  //Serial.println();
-  //Serial.println(endTime);
-  //Serial.println();
-
-  // writing the values of the sensor to global floats
-  //acceleration :
-  
-  digitalWrite(dustLEDPin, LOW); // LED anschalten
-  delayMicroseconds (280);
-  dustValue=analogRead(dustPin); // Staubsensor auslesen
-  delayMicroseconds (40);
-  digitalWrite(dustLEDPin, HIGH); // LED ausschalten
-  delayMicroseconds (9680); // Abklingen, vermutlich nicht nötig
-  voltage = dustValue *0.0048875; // umrechnen der ausgelesenen Daten zu Volt
-  if (voltage <= 3.5) { // nicht Linearität des Sensors beachten
-    dustDensity = voltage /7.5;
-  } else {
-    dustDensity = (voltage-3.5)*2 +0.4;
-  }
+  // read out gps data
   String gpsString = "";
   String temp = "";
-  if (!ermittleGPS) {
+  if (!readGPS) {
     temp = GetGGA();
     if (!temp.equals("")) {
       gpsString += temp;
     }
   }
+  
+  // save all the values
   saveData(currentHeight, accEvent.acceleration.x, accEvent.acceleration.y, accEvent.acceleration.z, magEvent.magnetic.x, magEvent.magnetic.y, magEvent.magnetic.z,
-           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, gpsString);
+           gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, externalTemperature, humidity, gpsString);
 
 }
 
+float readDustSensor() {
+  float currentDustDensity;
+  digitalWrite(dustLEDPin, LOW); // switch dust-LED on
+  delayMicroseconds (280);
+  dustValue=analogRead(dustPin); // read dust value
+  delayMicroseconds (40);
+  digitalWrite(dustLEDPin, HIGH); // switch dust-LED off
+  delayMicroseconds (9680); // cooldown
+  voltage = dustValue *0.0048875; // convert Volt to dustValue
+  if (voltage <= 3.5) { // nicht Linearität des Sensors beachten
+    currentDustDensity = voltage /7.5;
+  } else {
+    currentDustDensity = (voltage-3.5)*2 +0.4;
+  }
+  return currentDustDensity;
+}
+
 String GetGGA() {
-  //Serial.println("ermittle gga");
   String gps_output = "";
   boolean GGAready = false;
   boolean start = false;
   int inByte = 0;
   char inChar;
-  ermittleGPS = true;
+  readGPS = true;
   while (!GGAready) {
     // Serial.println(millis());
     if (Serial3.available()) {
@@ -230,28 +225,30 @@ String GetGGA() {
       //Serial.print(inByte); // Debug Ausgabe
       //Serial.print(", "); // Debug Ausgabe
       if (start) {
-        if (inByte==13) { // Abbruch Bedingung erreicht
+        if (inByte==13) { 
           GGAready=true;
         } else {
         gps_output += inChar;
         }
-      } else { // warten auf 10 im Stream, also Ende der Zeile
+      } else { 
         if (inByte==10) {
           start = true;
         }
       }// Ende if (start)
     } // Ende if (available)
   }// Ende while
-  ermittleGPS = false;
+  readGPS = false;
   return(gps_output);
 }
 
 
 void saveData(float currentHeight, float accelX, float accelY, float accelZ, float magX, float magY, float magZ, float gyroX, float gyroY, float gyroZ,
-              float pressure, float temperature, float dustDensity, String gpsString) {
+              float pressure, float temperature, float dustDensity, float externalTemp, float humidity, String gpsString) {
 
+  // open file on SD card              
   File myFile = SD.open("data.txt", FILE_WRITE);
               
+  // print all the data to each channel
   printData(currentHeight, myFile);
   printData(SERPERATOR, myFile);
   printData(accelX, myFile);
@@ -278,20 +275,23 @@ void saveData(float currentHeight, float accelX, float accelY, float accelZ, flo
   printData(SERPERATOR, myFile);
   printData(dustDensity, myFile);
   printData(SERPERATOR, myFile);
+  printData(externalTemp, myFile);
+  printData(SERPERATOR, myFile);
+  printData(humidity, myFile);
+  printData(SERPERATOR, myFile);
   printData(gpsString, myFile);  
   endLine(myFile);
   
+  // close the file and if ther is a problem report it
   if (myFile) {
     myFile.close();
   } else {
     Serial.println("File couldnt be opened");
     Serial1.println("File couldnt be opened");
   }
-  
-  
-  
 }
 
+// print a String to each channel
 void printData (String data, File myFile) {
   Serial.print(data);
   Serial1.print(data);
@@ -300,6 +300,7 @@ void printData (String data, File myFile) {
   }
 }
 
+// print a float to each channel
 void printData (float data, File myFile) {
   Serial.print(data);
   Serial1.print(data);
@@ -308,6 +309,7 @@ void printData (float data, File myFile) {
   }
 }
 
+// print carriage return to each channel
 void endLine (File myFile) {
   Serial.println();
   Serial1.println();
