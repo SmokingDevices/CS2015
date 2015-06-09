@@ -10,6 +10,9 @@
 const int chipSelect = 27;
 #define dustPin A9 // angeschlossen an Pin A9
 #define dustLEDPin 4
+
+#define GroundPressureTestCount 10
+
 /*********************** Assign a unique ID to the sensors ****************************/
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(30302);
@@ -17,9 +20,11 @@ Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(18001);
 Adafruit_L3GD20_Unified gyro = Adafruit_L3GD20_Unified(20);
 /**************************************************************************************/
 /*****************************Global Defines ******************************************/
-float seaLevelPressure = SENSORS_PRESSURE_SEALEVELHPA;
-float x2 = 0;
-float x1 = 0;
+float groundPressure = 0;
+boolean wasAbove50m = false;
+//float x2 = 0;
+//float x1 = 0;
+//float realhight;
 float accelX;
 float accelY;
 float accelZ;
@@ -31,7 +36,6 @@ float gyroY;
 float gyroZ;
 float pressureGlobal;
 float temp;
-float realhight;
 boolean ermittleGPS = false;
 // Dustsensor (2)
 int dustValue = 0; // Wert der vom Dust Sensor kommt
@@ -79,6 +83,20 @@ void setup(){
   }
   digitalWrite(20, LOW);
   delay (500);
+  
+  float pressureSum = 0;
+  for (int i = 0; i < GroundPressureTestCount; i++) {
+    sensors_event_t preshureEvent;
+    bmp.getEvent(&preshureEvent); 
+    pressureSum += preshureEvent.pressure;
+    Serial.print("groundpreshure = ");
+    Serial.println (preshureEvent.pressure);
+    delay(1000);
+  }
+  
+  groundPressure = pressureSum / GroundPressureTestCount;
+  Serial.print("GroundPressure=");
+  Serial.println(groundPressure);
 
   digitalWrite(21, LOW);
   delay (500);
@@ -137,6 +155,7 @@ void loop() {
   sensors_event_t gyroEvent;
   gyro.getEvent(&gyroEvent); // get gyrocope values
   sensors_event_t preshureEvent;
+  float currentHeight;
   bmp.getEvent(&preshureEvent); // get pressure
   float temperature; // Temp
 
@@ -144,11 +163,20 @@ void loop() {
   bmp.getTemperature(&temperature); // write temp into float
   float pressure = preshureEvent.pressure; // write current pressure to float
 
-  if(x1 == 0) { // get the pressure at the ground for calculating the altitude and setting this value to zero.
-    x1 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating the altitude from pressure
+  //if(x1 == 0) { // get the pressure at the ground for calculating the altitude and setting this value to zero.
+  currentHeight = bmp.pressureToAltitude(groundPressure,preshureEvent.pressure); // calculating the altitude from pressure
+  if (!wasAbove50m && currentHeight > 50) {
+    wasAbove50m = true;   
   }
-  float x2 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating altitude during flight
-  float realhight = x2 - x1; // calculating altitude over ground
+  
+  if (wasAbove50m && currentHeight < 50) {
+    digitalWrite(beepPin, HIGH);
+    delay (200);
+    digitalWrite(beepPin, LOW);  
+  }
+  //}
+  //float x2 = bmp.pressureToAltitude(seaLevelPressure,preshureEvent.pressure,temperature); // calculating altitude during flight
+  //float realhight = x2 - x1; // calculating altitude over ground
 
   //float startTime = millis();
   //float endTime = millis() - startTime;
@@ -180,7 +208,7 @@ void loop() {
       gpsString += temp;
     }
   }
-  saveData(accEvent.acceleration.x, accEvent.acceleration.y, accEvent.acceleration.z, magEvent.magnetic.x, magEvent.magnetic.y, magEvent.magnetic.z,
+  saveData(currentHeight, accEvent.acceleration.x, accEvent.acceleration.y, accEvent.acceleration.z, magEvent.magnetic.x, magEvent.magnetic.y, magEvent.magnetic.z,
            gyroEvent.gyro.x, gyroEvent.gyro.y, gyroEvent.gyro.z, preshureEvent.pressure, temperature, dustDensity, gpsString);
 
 }
@@ -219,11 +247,13 @@ String GetGGA() {
 }
 
 
-void saveData(float accelX, float accelY, float accelZ, float magX, float magY, float magZ, float gyroX, float gyroY, float gyroZ,
+void saveData(float currentHeight, float accelX, float accelY, float accelZ, float magX, float magY, float magZ, float gyroX, float gyroY, float gyroZ,
               float pressure, float temperature, float dustDensity, String gpsString) {
 
   File myFile = SD.open("data.txt", FILE_WRITE);
               
+  printData(currentHeight, myFile);
+  printData(SERPERATOR, myFile);
   printData(accelX, myFile);
   printData(SERPERATOR, myFile);
   printData(accelY, myFile);
