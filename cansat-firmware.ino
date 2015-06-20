@@ -23,6 +23,7 @@ Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(30302);
 Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(18001);
 Adafruit_L3GD20_Unified gyro = Adafruit_L3GD20_Unified(20);
+Adafruit_10DOF                dof   = Adafruit_10DOF();
 /**************************************************************************************/
 /*****************************Global Defines ******************************************/
 float groundPressure = 0;
@@ -143,7 +144,7 @@ void setup(){
   if (my10DOFFile) {
     Serial.print("File opened");
     my10DOFFile.println("-----------------------------------SNIP----------------------------------");
-    my10DOFFile.println("accelx,accely,accelz,magx,magy,magz,gyrox,gyroy,gyroz"); 
+    my10DOFFile.println("accelx,accely,accelz,magx,magy,magz,gyrox,gyroy,gyroz,roll,pitch,heading"); 
     // close the file:
     my10DOFFile.close();
     Serial.println("done.");
@@ -257,6 +258,24 @@ void read10dof () {
     my10DOFFile.print(gyroEvent.gyro.y);
     my10DOFFile.print(SERPERATOR);
     my10DOFFile.print(gyroEvent.gyro.z);
+    sensors_vec_t   orientation;
+    if (dof.fusionGetOrientation(&accEvent, &magEvent, &orientation))
+    {
+      my10DOFFile.print(orientation.roll);
+      my10DOFFile.print(SERPERATOR);
+      my10DOFFile.print(orientation.pitch);
+      my10DOFFile.print(SERPERATOR);
+      my10DOFFile.print(orientation.heading);
+      my10DOFFile.print(SERPERATOR);
+    } else {
+      // if not print empty
+      my10DOFFile.print(SERPERATOR);
+      my10DOFFile.print(SERPERATOR);
+      my10DOFFile.print(SERPERATOR);
+      
+    }
+    
+    
     my10DOFFile.println();
     my10DOFFile.close();
   } else {
@@ -406,5 +425,4 @@ float getHumidity(float degreesCelsius){
   float trueRH = sensorRH / (1.0546 - 0.0026 * degreesCelsius); //temperature adjustment 
   return trueRH;
 }
-
 
