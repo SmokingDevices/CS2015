@@ -226,6 +226,7 @@ my10DOFFile.print(SERPERATOR);
 my10DOFFile.print(gyroEvent.gyro.y);
 my10DOFFile.print(SERPERATOR);
 my10DOFFile.print(gyroEvent.gyro.z);
+my10DOFFile.print(SERPERATOR);
 sensors_vec_t orientation;
 if (dof.fusionGetOrientation(&accEvent, &magEvent, &orientation))
 {
