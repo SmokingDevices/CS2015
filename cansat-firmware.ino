@@ -107,7 +107,8 @@ void setup(){
   Serial.print("GroundPressure=");
   Serial.println(groundPressure);
   
-  Serial.println ("Secs,currentheight,accelx,accely,accelz,magx,magy,magz,gyrox,gyroy,gyroz,pressure,Temp,Dustdensity,Temp.ext,humidity,GPS"); 
+  Serial.println ("Secs,currentheight,pressure,Temp,Dustdensity,Temp.ext,humidity,GPS");
+  Serial1.println ("Secs,currentheight,pressure,Temp,Dustdensity,Temp.ext,humidity,GPS");
   
   digitalWrite(21, LOW);
   delay (500);
