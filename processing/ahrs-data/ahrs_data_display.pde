@@ -141,6 +141,9 @@ void draw() {
     
     currPos++;
   }
+  if (currPos > lines.length) {
+    currPos = 0;
+  }
 
   // Draw board
   pushMatrix();
@@ -153,7 +156,7 @@ void draw() {
   textAlign(LEFT);
 
   // Output info text
-  text("Point FTDI connector towards screen and press 'a' to align", 10, 25);
+  //text("Point FTDI connector towards screen and press 'a' to align", 10, 25);
 
   // Output angles
   pushMatrix();
@@ -162,7 +165,9 @@ void draw() {
   text("Yaw: " + ((int) yaw), 0, 0);
   text("Pitch: " + ((int) pitch), 150, 0);
   text("Roll: " + ((int) roll), 300, 0);
+  text("Line: " + ((int) currPos) +"/"+ ((int) lines.length), 450, 0);
   popMatrix();
+  delay(100);
 }
 
 void keyPressed() {
@@ -182,7 +187,6 @@ void keyPressed() {
   }
   */
 }
-
 
 
 
